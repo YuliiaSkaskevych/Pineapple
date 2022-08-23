@@ -1,0 +1,8 @@
+{% extends "base_site.html" %}
+
+{% block content %}
+   <h1>List of quotes:</h1>
+{% for obj in quote_list %}
+    <li><a href="{% url 'detail_post' pk=obj.pk %}">{{ obj.message }}</a></li>
+        {% endfor %}
+{% endblock %}

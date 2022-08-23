@@ -14,8 +14,27 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
+from catalog.views import RegisterFormView, UpdateProfile, UserProfile
+from catalog.views import RegisterFormView, UpdateProfile, UserProfile
+
+from django.conf import settings
+from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import include, path
+from django.views.generic import RedirectView
 
 urlpatterns = [
+    path('', RedirectView.as_view(url='/catalog/', permanent=True)),
     path('admin/', admin.site.urls),
+    path('catalog/', include('catalog.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path("accounts/register/", RegisterFormView.as_view(), name="register"),
+    path("accounts/update_profile/", UpdateProfile.as_view(), name="update_profile"),
+    path("accounts/my_profile/", UserProfile.as_view(), name="profile"),
 ]
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

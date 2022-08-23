@@ -1,0 +1,49 @@
+{% extends "base_site.html" %}
+
+{% block content %}
+    <h1>{{ post.heading }}</h1>
+    <ul>Message: {{ post.message }}</ul>
+    <ul>Author:<a href="{% url 'detail_user' id=post.author.id %}">{{ post.author }}</a></ul>
+    {% with comments.count as total_comments %}
+    <h2>
+        {{ total_comments }} comments: {{ total_comments|pluralize }}
+    </h2>
+    {% endwith %}
+    <div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">|<|</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">|>|</a>
+        {% endif %}
+    </span>
+</div>
+    <div class="comment">
+        {% for comment in comments %}
+        <p class="info">
+            {{ forloop.counter }} {{ comment.text }} by {{ comment.name }}
+            {{ comment.created }}
+        </p>
+        {{ comment.body|linebreaks }}
+    </div>
+{% empty %}
+    <p>There are no comments yet</p>
+{% endfor %}
+    {% if new_comment %}
+    <li>Your comment has been added</li>
+        {% else %}
+    <h2>Add a new comment</h2>
+    <form action="" method="POST">
+    {% csrf_token %}
+         {{ comment_form.as_p }}
+        <p><input type="submit" value="Add comment"></p>
+    </form>
+{% endif %}
+    <ul><a href="{% url 'index' %}">Back to main menu</a></ul>
+{% endblock %}

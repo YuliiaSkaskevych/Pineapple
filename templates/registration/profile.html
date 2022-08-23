@@ -1,0 +1,10 @@
+{% extends "base_site.html" %}
+
+{% block content %}
+
+  <p>Username: {{ object.username }}</p>
+  <p>Email: {{ object.email }}</p>
+    <ul><a href="{% url 'create_post' %}">Create new post</a></ul>
+    <ul><a href="{% url "update_profile" %}">Update my profile</a></ul>
+
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base_site.html" %}
+
+{% block content %}
+
+<h1>Information about user {{ name }}:</h1>
+    <ul>Name: {{ name }}</ul>
+    <ul>Email: {{ email }}</ul>
+<h2>Quotes written by {{ name }}: </h2>
+    {% for obj in quotes %}
+            <ul><a href="{% url 'detail_post' pk=obj.id %}">{{ obj.message }}</a></ul>
+    {% endfor %}
+<ul><a href="{% url 'index' %}">Back to main menu</a></ul>
+{% endblock %}

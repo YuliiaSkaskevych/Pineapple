@@ -1,0 +1,8 @@
+{% extends "base_site.html" %}
+
+{% block content %}
+   <h1>List of users:</h1>
+{% for obj in user_list %}
+    <li><a href="{% url 'detail_user' id=obj.id %}">{{ obj.username }}</a>{{ obj.quote.count }}</li>
+        {% endfor %}
+{% endblock %}
