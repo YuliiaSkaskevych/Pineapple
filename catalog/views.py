@@ -1,14 +1,14 @@
-import datetime
-import time
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import Count
-from django.views.generic import CreateView
+from .tasks import send_mail_to_admin, notification_to_user
+from bs4 import BeautifulSoup
+import requests
 
 from catalog.forms import RegisterForm, ContactForm, CommentForm
 from catalog.models import Quote, Comment
 
 from django.contrib import messages
+from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
@@ -72,6 +72,7 @@ class UserProfile(LoginRequiredMixin, generic.DetailView):
     model = User
     template_name = "registration/profile.html"
 
+
     def get_object(self, queryset=None):
         user = self.request.user
         return user
@@ -85,8 +86,10 @@ class QuoteCreate(LoginRequiredMixin, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        send_mail("New post!", f"{form.instance.author} create new post right now!", 'admin@example.com', ['admin@example.com'])
+        text = f"{form.instance.author} create new post right now!"
+        send_mail_to_admin.delay(text)
         return super().form_valid(form)
+
 
 
 class QuoteListView(generic.ListView):
@@ -99,7 +102,7 @@ class QuoteListView(generic.ListView):
 def user_info(request, id):
     """Information abut just one author"""
     user = User.objects.get(id=id)
-    quote_user = Quote.objects.select_related('author').filter(author_id=id)
+    quote_user = Quote.objects.select_related('author').filter(author_id=id, status='published')
     return render(
         request,
         'catalog/detail_user.html',
@@ -126,9 +129,9 @@ class QuoteChange(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
     fields = ["heading", "message", "status"]
     template_name = 'catalog/change_my_post.html'
     success_url = reverse_lazy("my_posts")
+    success_message = "Quote updated"
 
 
-success_message = "Quote updated"
 def contact_form(request):
     if request.method == "POST":
         form = ContactForm(request.POST)
@@ -136,7 +139,7 @@ def contact_form(request):
             subject = form.cleaned_data['subject']
             from_email = form.cleaned_data['from_email']
             message = form.cleaned_data['message']
-            # celery_send_mail.delay(subject, message, from_email)
+            send_mail_to_admin.delay(subject, message, from_email)
             messages.add_message(request, messages.SUCCESS, 'Message sent')
             try:
                 send_mail(subject, message, from_email, ['admin@example.com'])
@@ -167,6 +170,19 @@ def detail_post(request, pk):
             new_comment = comment_form.save(commit=False)
             new_comment.post = post
             new_comment.save()
+            text = f'New comment to post {post.heading} by {post.author} from {new_comment.name}'
+            send_mail_to_admin.delay(text)
+            url = request.build_absolute_uri()
+            r = requests.get(url)
+            s = BeautifulSoup(r.content, 'html.parser')
+            url_part = s.find("div", {'class': "col-sm-10"}).a.get('href')
+            url_user = 'http://127.0.0.1:8000' + url_part
+            user_request = requests.get(url_user)
+            s2 = BeautifulSoup(user_request.content, 'html.parser')
+            user_email = s2.find("ul", {'class': "email"}).get_text()
+            message = f'You get new comment to your post {post.heading} {url} from {new_comment.name}'
+            notification_to_user.delay(message, user_email)
+
     else:
         comment_form = CommentForm()
     return render(request,

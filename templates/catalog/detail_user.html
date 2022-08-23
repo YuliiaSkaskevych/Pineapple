@@ -3,11 +3,16 @@
 {% block content %}
 
 <h1>Information about user {{ name }}:</h1>
-    <ul>Name: {{ name }}</ul>
-    <ul>Email: {{ email }}</ul>
+    <ul>{{ name }}></ul>
+    <ul class="email">{{ email }}</ul>
 <h2>Quotes written by {{ name }}: </h2>
+    {% if quotes %}
     {% for obj in quotes %}
-            <ul><a href="{% url 'detail_post' pk=obj.id %}">{{ obj.message }}</a></ul>
+            <ul><a href="{% url 'detail_post' pk=obj.pk %}">{{ obj.message }}</a></ul>
     {% endfor %}
+    {% else %}
+        <ul>No quotes yet</ul>
+    {% endif %}
+
 <ul><a href="{% url 'index' %}">Back to main menu</a></ul>
 {% endblock %}

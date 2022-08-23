@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-0@2=@##8ihduyk@bm)ymt%i52mp4x67p*7t#0a%q2m!3a)tgl+')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
 ALLOWED_HOSTS = [
     "localhost",
@@ -47,12 +47,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'catalog',
+    'django_extensions',
     'django_celery_results',
     'django_celery_beat',
-    'debug_toolbar',
-    'django_extensions',
 ]
 
+
+
+if DEBUG:
+    INSTALLED_APPS += [
+        "debug_toolbar",
+        ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -151,6 +156,17 @@ MESSAGE_TAGS = {
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_RESULT_BACKEND = 'django-db'
@@ -159,9 +175,13 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
-
 GRAPH_MODELS = {
   'all_applications': True,
   'group_models': True,
   'app_labels': ["catalog"],
 }
+
+try:
+    from local_settings import *
+except ImportError:
+    pass
