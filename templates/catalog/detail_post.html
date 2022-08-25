@@ -6,35 +6,31 @@
     <ul>Author:<a href="{% url 'detail_user' id=post.author.id %}">{{ post.author }}</a></ul>
     {% with comments.count as total_comments %}
     <h2>
-        {{ total_comments }} comments: {{ total_comments|pluralize }}
+        {{ total_comments }} comments:
     </h2>
     {% endwith %}
     <div class="pagination">
     <span class="step-links">
-        {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}">|<|</a>
-        {% endif %}
-
         <span class="current">
             Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
         </span>
-
-        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">|>|</a>
-        {% endif %}
-    </span>
-</div>
-    <div class="comment">
-        {% for comment in comments %}
+     {% for comment in comments %}
         <p class="info">
             {{ forloop.counter }} {{ comment.text }} by {{ comment.name }}
             {{ comment.created }}
         </p>
         {{ comment.body|linebreaks }}
-    </div>
 {% empty %}
     <p>There are no comments yet</p>
 {% endfor %}
+      {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">|<|</a>
+        {% endif %}
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">|>|</a>
+        {% endif %}
+    </span>
+</div>
     {% if new_comment %}
     <li>Your comment has been added</li>
         {% else %}
@@ -45,5 +41,6 @@
         <p><input type="submit" value="Add comment"></p>
     </form>
 {% endif %}
+    </div>
     <ul><a href="{% url 'index' %}">Back to main menu</a></ul>
 {% endblock %}

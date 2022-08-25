@@ -1,7 +1,9 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.messages.views import SuccessMessageMixin
-from .tasks import send_mail_to_admin, notification_to_user
+from .tasks import send_mail_to_admin, notification_to_user, contact_us
 from bs4 import BeautifulSoup
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 import requests
 
 from catalog.forms import RegisterForm, ContactForm, CommentForm
@@ -132,38 +134,61 @@ class QuoteChange(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
     success_message = "Quote updated"
 
 
-def contact_form(request):
-    if request.method == "POST":
-        form = ContactForm(request.POST)
+# def contact_form(request):
+#     data = dict()
+#     if request.method == "POST":
+#         form = ContactForm(request.POST)
+#         if form.is_valid():
+#             data['form_is_valid'] = True
+#             subject = form.cleaned_data['subject']
+#             from_email = form.cleaned_data['from_email']
+#             message = form.cleaned_data['message']
+#             data['html_form'] = render_to_string('catalog/contact_form.html', {
+#                 'subject': subject,
+#                 'from_email': from_email,
+#                 'message': message,
+#             })
+#
+#     else:
+#         form = ContactForm(request.POST)
+#         data['form_is_valid'] = False
+#     context = {'form': form}
+#     data['html_form'] = render_to_string(context, request=request)
+#     return JsonResponse(data)
+def send_contact(request, form, template_name):
+    data = dict()
+    if request.method == 'POST':
         if form.is_valid():
+            data['form_is_valid'] = True
             subject = form.cleaned_data['subject']
             from_email = form.cleaned_data['from_email']
             message = form.cleaned_data['message']
-            send_mail_to_admin.delay(subject, message, from_email)
             messages.add_message(request, messages.SUCCESS, 'Message sent')
-            try:
-                send_mail(subject, message, from_email, ['admin@example.com'])
-                messages.add_message(request, messages.SUCCESS, 'Message sent')
-            except BadHeaderError:
-                messages.add_message(request, messages.ERROR, 'Message not sent')
-            return redirect('contact')
+            data['html_base_site'] = render_to_string('catalog/contact_form.html', {
+                'subject': subject,
+                'from_email': from_email,
+                'message': message,
+            })
+            contact_us.delay(subject, message, from_email)
+            return redirect('index')
+        else:
+            data['form_is_valid'] = False
+    context = {'form': form}
+    data['html_form'] = render_to_string(template_name, context, request=request)
+    return JsonResponse(data)
+
+
+def contact(request):
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
     else:
         form = ContactForm()
-    return render(
-        request,
-        "catalog/contact.html",
-        context={
-            "form": form,
-        }
-    )
+    return send_contact(request, form, 'catalog/contact.html')
 
 
 def detail_post(request, pk):
     post = get_object_or_404(Quote, pk=pk, status='published')
     comments = post.comments.filter(published=True)
-    page = request.GET.get('page', 1)
-    paginator = Paginator(comments, 5)
-    page_obj = paginator.page(page)
     if request.method == 'POST':
         comment_form = CommentForm(data=request.POST)
         if comment_form.is_valid():
@@ -185,6 +210,9 @@ def detail_post(request, pk):
 
     else:
         comment_form = CommentForm()
+    page = request.GET.get('page', 1)
+    paginator = Paginator(comments, 5)
+    page_obj = paginator.page(page)
     return render(request,
                   'catalog/detail_post.html',
                   {'post': post,

@@ -11,5 +11,5 @@ urlpatterns = [
     path("my_posts/<int:pk>/", QuoteChange.as_view(), name='change_my_posts'),
     path('posts/', QuoteListView.as_view(), name='posts'),
     path("posts/<int:pk>/", views.detail_post, name='detail_post'),
-    path('contact/', views.contact_form, name="contact"),
+    path('contact/', views.contact, name="contact"),
     ]

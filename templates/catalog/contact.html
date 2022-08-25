@@ -1,14 +1,16 @@
-{% extends "base_site.html" %}
-
-{% block br_cr %}{{ block.super }}/<a href="{% url 'contact' %}">Contact</a>{% endblock %}
-
-{% block content %}
-  <h1>Contact to admin</h1>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <div class="form-actions">
-      <button type="submit">Send email</button>
-    </div>
-  </form>
-{% endblock %}
+<form method="post" action="{% url 'contact' %}" class="js">
+  {% csrf_token %}
+  <div class="modal-header">
+    <h4 class="modal-title">Contact us</h4>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    {% include 'catalog/contact_form.html' %}
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+    <button type="submit" class="btn btn-primary">Send email</button>
+  </div>
+</form>
