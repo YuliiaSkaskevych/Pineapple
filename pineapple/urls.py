@@ -32,7 +32,8 @@ urlpatterns = [
     path("accounts/register/", RegisterFormView.as_view(), name="register"),
     path("accounts/update_profile/", UpdateProfile.as_view(), name="update_profile"),
     path("accounts/my_profile/", UserProfile.as_view(), name="profile"),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 if settings.DEBUG:
     import debug_toolbar
     urlpatterns = [

@@ -2,7 +2,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.messages.views import SuccessMessageMixin
 from .tasks import send_mail_to_admin, notification_to_user, contact_us
 from bs4 import BeautifulSoup
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.template.loader import render_to_string
 import requests
 
@@ -80,11 +80,12 @@ class UserProfile(LoginRequiredMixin, generic.DetailView):
         return user
 
 
-class QuoteCreate(LoginRequiredMixin, generic.CreateView):
+class QuoteCreate(LoginRequiredMixin, SuccessMessageMixin, generic.CreateView):
     model = Quote
-    fields = ["heading", "message", "status"]
+    fields = ["heading", 'description', "message", 'image', "status"]
     template_name = 'catalog/create_post.html'
     success_url = reverse_lazy("my_posts")
+    success_message = "Create new post successfully!"
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -128,33 +129,12 @@ class LoanedQuotesByUserListView(LoginRequiredMixin, generic.ListView):
 
 class QuoteChange(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
     model = Quote
-    fields = ["heading", "message", "status"]
+    fields = ["heading", "message", "status", 'description', 'image']
     template_name = 'catalog/change_my_post.html'
     success_url = reverse_lazy("my_posts")
-    success_message = "Quote updated"
+    success_message = "Quote updated!"
 
 
-# def contact_form(request):
-#     data = dict()
-#     if request.method == "POST":
-#         form = ContactForm(request.POST)
-#         if form.is_valid():
-#             data['form_is_valid'] = True
-#             subject = form.cleaned_data['subject']
-#             from_email = form.cleaned_data['from_email']
-#             message = form.cleaned_data['message']
-#             data['html_form'] = render_to_string('catalog/contact_form.html', {
-#                 'subject': subject,
-#                 'from_email': from_email,
-#                 'message': message,
-#             })
-#
-#     else:
-#         form = ContactForm(request.POST)
-#         data['form_is_valid'] = False
-#     context = {'form': form}
-#     data['html_form'] = render_to_string(context, request=request)
-#     return JsonResponse(data)
 def send_contact(request, form, template_name):
     data = dict()
     if request.method == 'POST':
@@ -188,36 +168,36 @@ def contact(request):
 
 def detail_post(request, pk):
     post = get_object_or_404(Quote, pk=pk, status='published')
+    author = post.author
     comments = post.comments.filter(published=True)
+    paginator = Paginator(comments, 5)
+    page_num = request.GET.get('page', 1)
+    try:
+        page_obj = paginator.page(page_num)
+    except EmptyPage:
+        raise Http404()
+    except PageNotAnInteger:
+        raise Http404()
     if request.method == 'POST':
         comment_form = CommentForm(data=request.POST)
         if comment_form.is_valid():
             new_comment = comment_form.save(commit=False)
             new_comment.post = post
             new_comment.save()
+            messages.add_message(request, messages.SUCCESS, 'Create new comment!')
             text = f'New comment to post {post.heading} by {post.author} from {new_comment.name}'
             send_mail_to_admin.delay(text)
             url = request.build_absolute_uri()
-            r = requests.get(url)
-            s = BeautifulSoup(r.content, 'html.parser')
-            url_part = s.find("div", {'class': "col-sm-10"}).a.get('href')
-            url_user = 'http://127.0.0.1:8000' + url_part
-            user_request = requests.get(url_user)
-            s2 = BeautifulSoup(user_request.content, 'html.parser')
-            user_email = s2.find("ul", {'class': "email"}).get_text()
             message = f'You get new comment to your post {post.heading} {url} from {new_comment.name}'
-            notification_to_user.delay(message, user_email)
+            notification_to_user.delay(message, author.email)
 
     else:
         comment_form = CommentForm()
-    page = request.GET.get('page', 1)
-    paginator = Paginator(comments, 5)
-    page_obj = paginator.page(page)
     return render(request,
                   'catalog/detail_post.html',
                   {'post': post,
                    'comments': comments,
                    'comment_form': comment_form,
-                   'page_obj': page_obj
+                   'page_obj': page_obj,
                    }
                   )

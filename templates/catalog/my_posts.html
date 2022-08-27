@@ -5,11 +5,11 @@
    <h1>List of quotes:</h1>
    <ul>
         {% for obj in quote_list %}
-            <li>{{ obj.status }} <a href="{% url 'change_my_posts' pk=obj.pk %}">{{ obj.message }}</a></li>
+            <li>{{ obj.status }} <a href="{% url 'change_my_posts' pk=obj.pk %}">{{ obj.heading }} {{ obj.description }}</a></li>
         {% endfor %}
         </ul>
     {% else %}
-    <p>There are no books borrowed.</p>
+    <p>There are no quotes</p>
    {% endif %}
 
 

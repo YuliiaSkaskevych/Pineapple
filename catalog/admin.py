@@ -9,8 +9,8 @@ class CommentInlineModelAdmin(admin.TabularInline):
 
 @admin.register(Quote)
 class QuoteModelAdmin(admin.ModelAdmin):
-    list_display = ['message', 'heading', 'author', 'status']
-    fields = ['message', 'heading', 'author', 'publish']
+    list_display = ['heading', 'description', 'message', 'author', 'status']
+    fields = ['heading', 'description', 'message', 'image', 'author', 'publish']
     raw_id_fields = ['author', ]
     date_hierarchy = "publish"
     search_fields = ["author", "heading"]

@@ -10,8 +10,10 @@ class Quote(models.Model):
         ('draft', 'Draft'),
         ('published', 'Published'),
     )
-    heading = models.CharField(max_length=200)
+    heading = models.CharField(max_length=100)
+    description = models.CharField(max_length=200)
     message = models.TextField(max_length=100000)
+    image = models.ImageField("image", upload_to='static/images')
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
     publish = models.DateTimeField(default=timezone.now)

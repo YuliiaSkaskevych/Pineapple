@@ -21,14 +21,12 @@
 
 
   {% cache 10 num_books num_instances num_instances_available num_authors %}
-{#  <h2>Dynamic content</h2>#}
+  <h2>Dynamic content</h2>
 
   <p>The statistics of site "Pineapple" :</p>
   <ul>
     <li><strong>Users:</strong> {{ num_users }}</li>
     <li><strong>Quotes:</strong> {{ num_quotes }}</li>
-{#    <li><strong>Comments:</strong> {{ num_comments }}</li>#}
-{#    <li><strong>Authors:</strong> {{ num_authors }}</li>#}
   </ul>
   {% endcache %}
 
