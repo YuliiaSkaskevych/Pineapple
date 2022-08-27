@@ -20,8 +20,8 @@ class Command(BaseCommand):
         comments = []
         for i in range(number):
             user = User(username=fake.name(),
-                         email=fake.email(),
-                         password=make_password(str(fake.password())))
+                        email=fake.email(),
+                        password=make_password(str(fake.password())))
             users.append(user)
         User.objects.bulk_create(users)
         for x in range(35):
@@ -30,7 +30,7 @@ class Command(BaseCommand):
                               description=fake.text(),
                               message=fake.text(),
                               status='published',
-                              author_id=User.objects.get(pk=i+1).pk)
+                              author_id=User.objects.get(pk=i + 1).pk)
                 quotes.append(quote)
             Quote.objects.bulk_create(quotes)
         for x in range(20):
@@ -38,7 +38,7 @@ class Command(BaseCommand):
                 comment = Comment(name=fake.name(),
                                   text=fake.text(),
                                   published=True,
-                                  post_id=Quote.objects.get(id=i+1).pk)
+                                  post_id=Quote.objects.get(id=i + 1).pk)
                 comments.append(comment)
             Comment.objects.bulk_create(comments)
         self.stdout.write(self.style.SUCCESS('DB is populated %s values successfully!' % number))

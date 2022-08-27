@@ -1,21 +1,15 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.messages.views import SuccessMessageMixin
 from .tasks import send_mail_to_admin, notification_to_user, contact_us
-from bs4 import BeautifulSoup
 from django.http import JsonResponse, Http404
 from django.template.loader import render_to_string
-import requests
 
 from catalog.forms import RegisterForm, ContactForm, CommentForm
-from catalog.models import Quote, Comment
+from catalog.models import Quote
 
 from django.contrib import messages
-from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import authenticate, login, get_user_model
-from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.core.mail import BadHeaderError, send_mail
-from django.http import HttpResponseRedirect
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views import generic
@@ -91,7 +85,6 @@ class QuoteCreate(LoginRequiredMixin, SuccessMessageMixin, generic.CreateView):
         text = f"{form.instance.author} create new post right now!"
         send_mail_to_admin.delay(text)
         return super().form_valid(form)
-
 
 
 class QuoteListView(generic.ListView):

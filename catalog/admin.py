@@ -17,11 +17,9 @@ class QuoteModelAdmin(admin.ModelAdmin):
     actions = ["change_status_to_draft", "change_status_to_published"]
     inlines = [CommentInlineModelAdmin]
 
-
     def change_status_to_draft(self, request, queryset):
         queryset.update(status='draft')
     change_status_to_draft.short_description = "Status: draft"
-
 
     def change_status_to_published(self, request, queryset):
         queryset.update(status='published')
@@ -45,6 +43,3 @@ class CommentModelAdmin(admin.ModelAdmin):
         queryset.update(published=False)
 
     block_comment.short_description = "Block comment to publication"
-
-
-

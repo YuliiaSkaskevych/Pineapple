@@ -73,8 +73,7 @@ ROOT_URLCONF = 'pineapple.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -188,8 +187,3 @@ GRAPH_MODELS = {
   'group_models': True,
   'app_labels': ["catalog"],
 }
-
-try:
-    from local_settings import *
-except ImportError:
-    pass
