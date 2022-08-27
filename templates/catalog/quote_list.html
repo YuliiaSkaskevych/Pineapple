@@ -3,6 +3,7 @@
 {% block content %}
    <h1>List of quotes:</h1>
 {% for obj in quote_list %}
-    <li><a href="{% url 'detail_post' pk=obj.pk %}">{{ obj.heading }} {{ obj.description }}</a></li>
+    <li><a href="{% url 'detail_post' pk=obj.pk %}">"{{ obj.heading }}"</a> {{ obj.description }}</li>
+    <ul><a href="{% url 'detail_user' id=obj.author.id %}">{{ obj.author }}</a></ul>
         {% endfor %}
 {% endblock %}

@@ -2,17 +2,33 @@
 
 {% block content %}
 
-<h1>Information about user {{ name }}:</h1>
-    <ul>{{ name }}></ul>
-    <ul class="email">{{ email }}</ul>
-<h2>Quotes written by {{ name }}: </h2>
-    {% if quotes %}
-    {% for obj in quotes %}
-            <ul><a href="{% url 'detail_post' pk=obj.pk %}">{{ obj.heading }} {{ obj.description }}</a></ul>
-    {% endfor %}
-    {% else %}
-        <ul>No quotes yet</ul>
-    {% endif %}
+<h1>Information about user {{ username }}:</h1>
+    <ul>First name: {{ first_name }}</ul>
+    <ul>Last name: {{ last_name }}</ul>
+    <ul>Email: {{ email }}</ul>
+<h2>Quotes written by {{ username }}: </h2>
+        <div class="pagination">
+    <span class="step-links">
+     {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">|<|</a>
+        {% endif %}
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">|>|</a>
+        {% endif %}
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+   {% with quote_user.count as count %}
+    <ul>Total quotes: {{ count }}</ul>
+    {% endwith %}
+     {% for quote in page_obj %}
+        <p class="info">
+            {{ forloop.counter }}<a href="{% url 'detail_post' pk=quote.pk %}">"{{ quote.heading }}"</a> {{ quote.description }}
+        </p>
+{% empty %}
+    <p>There are no quotes yet</p>
+{% endfor %}
+    </span>
+</div>
 
-<ul><a href="{% url 'index' %}">Back to main menu</a></ul>
 {% endblock %}

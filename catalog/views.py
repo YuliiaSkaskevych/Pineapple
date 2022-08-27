@@ -43,7 +43,7 @@ def index(request):
 class UserListView(generic.ListView):
     model = User
     template_name = 'catalog/users_list.html'
-    paginate_by = 20
+    paginate_by = 8
 
 
 class RegisterFormView(generic.FormView):
@@ -60,10 +60,10 @@ class RegisterFormView(generic.FormView):
 
 class UpdateProfile(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
     model = User
-    fields = ["first_name", "last_name", "email"]
+    fields = ['username', "first_name", "last_name", "email"]
     template_name = 'registration/update_profile.html'
-    success_url = reverse_lazy("index")
-    success_message = "Profile updated"
+    success_url = reverse_lazy("profile")
+    success_message = "Profile updated successfully!"
 
     def get_object(self, queryset=None):
         user = self.request.user
@@ -73,7 +73,6 @@ class UpdateProfile(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView)
 class UserProfile(LoginRequiredMixin, generic.DetailView):
     model = User
     template_name = "registration/profile.html"
-
 
     def get_object(self, queryset=None):
         user = self.request.user
@@ -106,12 +105,23 @@ def user_info(request, id):
     """Information abut just one author"""
     user = User.objects.get(id=id)
     quote_user = Quote.objects.select_related('author').filter(author_id=id, status='published')
+    paginator = Paginator(quote_user, 5)
+    page_num = request.GET.get('page', 1)
+    try:
+        page_obj = paginator.page(page_num)
+    except EmptyPage:
+        raise Http404()
+    except PageNotAnInteger:
+        raise Http404()
     return render(
         request,
         'catalog/detail_user.html',
-        {'name': user.username,
+        {'username': user.username,
+         'first_name': user.first_name,
+         'last_name': user.last_name,
          'email': user.email,
-         'quotes': quote_user
+         'quote_user': quote_user,
+         'page_obj': page_obj
          }
     )
 
@@ -119,7 +129,7 @@ def user_info(request, id):
 class LoanedQuotesByUserListView(LoginRequiredMixin, generic.ListView):
     model = Quote
     template_name = 'catalog/my_posts.html'
-    paginate_by = 10
+    paginate_by = 5
 
     def get_queryset(self):
         return Quote.objects.filter(
@@ -132,7 +142,7 @@ class QuoteChange(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
     fields = ["heading", "message", "status", 'description', 'image']
     template_name = 'catalog/change_my_post.html'
     success_url = reverse_lazy("my_posts")
-    success_message = "Quote updated!"
+    success_message = "Quote updated successfully!"
 
 
 def send_contact(request, form, template_name):

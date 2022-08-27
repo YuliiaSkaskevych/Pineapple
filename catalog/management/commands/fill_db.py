@@ -1,4 +1,4 @@
-from catalog.models import Quote
+from catalog.models import Quote, Comment
 from django.core.management.base import BaseCommand
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
@@ -15,18 +15,30 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         number = options['number']
-        obj = []
+        users = []
         quotes = []
+        comments = []
         for i in range(number):
-            users = User(username=fake.name(),
+            user = User(username=fake.name(),
                          email=fake.email(),
                          password=make_password(str(fake.password())))
-            obj.append(users)
-        User.objects.bulk_create(obj)
-        for i in range(number):
-            quote = Quote(
-                          message=fake.text(),
-                          author_id=User.objects.get(pk=i+1).pk)
-            quotes.append(quote)
-        Quote.objects.bulk_create(quotes)
+            users.append(user)
+        User.objects.bulk_create(users)
+        for x in range(35):
+            for i in range(number):
+                quote = Quote(heading=fake.word(),
+                              description=fake.text(),
+                              message=fake.text(),
+                              status='published',
+                              author_id=User.objects.get(pk=i+1).pk)
+                quotes.append(quote)
+            Quote.objects.bulk_create(quotes)
+        for x in range(20):
+            for i in range(number):
+                comment = Comment(name=fake.name(),
+                                  text=fake.text(),
+                                  published=True,
+                                  post_id=Quote.objects.get(id=i+1).pk)
+                comments.append(comment)
+            Comment.objects.bulk_create(comments)
         self.stdout.write(self.style.SUCCESS('DB is populated %s values successfully!' % number))

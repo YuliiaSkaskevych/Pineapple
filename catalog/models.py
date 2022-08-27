@@ -13,7 +13,7 @@ class Quote(models.Model):
     heading = models.CharField(max_length=100)
     description = models.CharField(max_length=200)
     message = models.TextField(max_length=100000)
-    image = models.ImageField("image", upload_to='static/images')
+    image = models.ImageField("image", upload_to='static/images', default=None)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
     publish = models.DateTimeField(default=timezone.now)
