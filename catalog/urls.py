@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import QuoteCreate, QuoteListView, UserListView, LoanedQuotesByUserListView, QuoteChange
+from .views import QuoteCreate, QuoteListView, UserListView, LoanedQuotesByUserListView, QuoteChange, QuoteDelete
 from django.views.decorators.cache import cache_page
 
 urlpatterns = [
@@ -10,7 +10,7 @@ urlpatterns = [
     path("create_post/", QuoteCreate.as_view(), name='create_post'),
     path("my_posts/", LoanedQuotesByUserListView.as_view(), name='my_posts'),
     path("my_posts/<int:pk>/", QuoteChange.as_view(), name='change_my_posts'),
+    path("my_posts/<int:pk>/delete/", QuoteDelete.as_view(), name='delete_quote'),
     path('posts/', QuoteListView.as_view(), name='posts'),
     path("posts/<int:pk>/", cache_page(2)(views.detail_post), name='detail_post'),
-    path('contact/', views.contact, name="contact"),
     ]

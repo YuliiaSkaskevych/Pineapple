@@ -1,3 +1,4 @@
+from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.messages.views import SuccessMessageMixin
 from .tasks import send_mail_to_admin, notification_to_user, contact_us
@@ -87,6 +88,13 @@ class QuoteCreate(LoginRequiredMixin, SuccessMessageMixin, generic.CreateView):
         return super().form_valid(form)
 
 
+class QuoteDelete(LoginRequiredMixin, SuccessMessageMixin, generic.DeleteView):
+    model = Quote
+    template_name = 'catalog/delete_post.html'
+    success_message = "Quote was deleted successfully!"
+    success_url = reverse_lazy('my_posts')
+
+
 class QuoteListView(generic.ListView):
     model = Quote
     template_name = 'catalog/quote_list.html'
@@ -138,36 +146,25 @@ class QuoteChange(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
     success_message = "Quote updated successfully!"
 
 
-def send_contact(request, form, template_name):
+def contact(request):
     data = dict()
     if request.method == 'POST':
+        form = ContactForm(request.POST)
         if form.is_valid():
             data['form_is_valid'] = True
             subject = form.cleaned_data['subject']
             from_email = form.cleaned_data['from_email']
             message = form.cleaned_data['message']
-            messages.add_message(request, messages.SUCCESS, 'Message sent')
-            data['html_base_site'] = render_to_string('catalog/contact_form.html', {
-                'subject': subject,
-                'from_email': from_email,
-                'message': message,
-            })
+            messages.add_message(request, messages.SUCCESS, 'Message was sent successfully!')
             contact_us.delay(subject, message, from_email)
-            return redirect('index')
+            data['contact_form'] = render_to_string('base_site.html')
         else:
             data['form_is_valid'] = False
-    context = {'form': form}
-    data['html_form'] = render_to_string(template_name, context, request=request)
-    return JsonResponse(data)
-
-
-def contact(request):
-    if request.method == 'POST':
-        form = ContactForm(request.POST)
     else:
         form = ContactForm()
-    return send_contact(request, form, 'catalog/contact.html')
-
+    context = {'form': form}
+    data['html_form'] = render_to_string('catalog/contact.html', context, request=request)
+    return JsonResponse(data)
 
 def detail_post(request, pk):
     post = get_object_or_404(Quote, pk=pk, status='published')

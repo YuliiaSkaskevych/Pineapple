@@ -5,22 +5,13 @@
 {% block content %}
   <h1>Pineapple statistics</h1>
 
-{#  <p>Welcome to <em>LocalLibrary</em>, a very basic Django website developed as a <a#}
-{#      href="https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/Tutorial_local_library_website">tutorial#}
-{#    example</a> on the Mozilla Developer Network.</p>#}
-{#  <p>The tutorial demonstrates how to create a Django skeleton website and application, define URL mappings, views#}
-{#    (including Generic List and Detail Views), models and templates.</p>#}
 
-{##}
-{#  <h2>UML Models</h2>#}
-{#  <p>An UML diagram of the site's Django model structure is shown below. </p>#}
-{##}
-{#  <div>#}
-{#    <img src="{% static "images/local_library_model_uml.png" %}" alt="My image" style="height:540px;"/>#}
-{#  </div>#}
+  <div>
+    <img src="{% static "images/background.gif" %}" alt="My image" style="height:245px;"/>
+  </div>
 
 
-  {% cache 10 num_books num_instances num_instances_available num_authors %}
+  {% cache 10 num_users num_quotes %}
   <h2>Dynamic content</h2>
 
   <p>The statistics of site "Pineapple" :</p>

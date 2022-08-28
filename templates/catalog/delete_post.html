@@ -1,0 +1,11 @@
+{% extends "base_site.html" %}
+
+{% block content %}
+<h1>Delete quote</h1>
+  <p>Are you sure you want to delete the quote "{{ quote.heading }}"?</p>
+  <form action="" method="POST">
+    {% csrf_token %}
+          {{ form }}
+    <button type="submit" class="btn btn-success">Delete post</button>
+  </form>
+{% endblock %}

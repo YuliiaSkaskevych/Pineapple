@@ -5,7 +5,12 @@
    <h1>List of quotes:</h1>
    <ul>
         {% for obj in quote_list %}
-            <li>{{ obj.status }} <a href="{% url 'change_my_posts' pk=obj.pk %}">{{ obj.heading }} {{ obj.description }}</a></li>
+            <li>Heading: "{{ obj.heading }}" </li>
+            <ul>Status: {{ obj.status }}</ul>
+            <ul>
+                <a href="{% url 'change_my_posts' pk=obj.pk %}">Change post</a>
+                <a href="{% url 'delete_quote' pk=obj.pk %}">Delete post</a>
+            </ul>
         {% endfor %}
         </ul>
     {% else %}

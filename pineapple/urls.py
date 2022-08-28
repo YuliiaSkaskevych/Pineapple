@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from catalog import views
 from catalog.views import RegisterFormView, UpdateProfile, UserProfile
 
 from django.conf import settings
@@ -23,6 +24,7 @@ from django.views.generic import RedirectView
 
 urlpatterns = [
     path('', RedirectView.as_view(url='/catalog/', permanent=True)),
+    path('contact/', views.contact, name="contact"),
     path('admin/', admin.site.urls),
     path('catalog/', include('catalog.urls')),
     path('accounts/', include('django.contrib.auth.urls')),

@@ -1,4 +1,4 @@
-Django example site,
+Django example site
 Homework #17-19,
 Task that were done in this work:
 User can register + login/logout
