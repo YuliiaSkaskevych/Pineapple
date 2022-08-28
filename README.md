@@ -1,6 +1,6 @@
-  /DJANGO EXPERIMENTAL BLOG\
-Homework #17-19\
-*Task that were done in this work:\
+ DJANGO EXPERIMENTAL BLOG\
+ Homework #17-19\
+ Task that were done in this work:\
 *User can register + login/logout\
 *User can create posts (login required)\
 *The user can publish posts or put them into blanks (the user can publish them later)\
