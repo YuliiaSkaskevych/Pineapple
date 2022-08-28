@@ -25,3 +25,5 @@ Different settings for development and production
 Database query optimization
 caching
 Celery
+
+![Diagram](https://github.com/YuliiaSkaskevych/Pineapple/blob/main/static/images/pineapple.png)
